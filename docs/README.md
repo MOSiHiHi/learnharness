@@ -13,6 +13,7 @@
 
 - [Development](development.md) — setup, configuration, safe local work, debugging, and checks.
 - [Architecture](architecture.md) — runtime flows, storage, and integration boundaries.
+- [Onboarding guide](UA_ONBOARDING.md) — code map, key concepts, and complexity hotspots for new contributors.
 - [Prompt composition](../src/agent/prompts/README.md) — source fragments and user overrides.
 - [Tool-content recovery](tool-content-recovery.md) — display-only recovery of model-authored escaping defects.
 - [Desktop builds and releases](desktop-release.md) — packaging, release gates, and updates.
