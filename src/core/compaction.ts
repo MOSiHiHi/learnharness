@@ -39,6 +39,8 @@ import { derivePlanStatusesLh, derivedNodeStatus } from "./contracts/plan.ts";
 import { COMPACTED_HISTORY_HEADER } from "./contracts/chat.ts";
 import type { LhMessage, LhMarkerMessage } from "./native-messages.ts";
 import { newMessageId } from "./native-messages.ts";
+import { activeCompactionOf, keptIndexFor, type CompactionDetails } from "./compaction-queries.ts";
+export { activeCompactionOf, keptIndexFor, type CompactionDetails };
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { Api, AssistantMessage, Model, ToolResultMessage, SystemMessage } from "@earendil-works/pi-ai";
 
@@ -260,22 +262,8 @@ export function compactionCutIndex(messages: readonly LhMessage[], keepRecentTok
 }
 
 // ─── the marker ──────────────────────────────────────────────────────────────
-
-/** The compaction marker's details (UI payload — never model-visible;
- * the model sees content, the header + summary). */
-export interface CompactionDetails {
-	/** Record id of the first KEPT message: the projection renders the
-	 * summary, then everything from this message onward. */
-	firstKeptMessageId: string;
-	/** The estimated context tokens that triggered this compaction
-	 * (provenance for the divider's tooltip/dialog). */
-	tokensBefore: number;
-	/** provider:id of the model that wrote the summary (the session's
-	 * own model — owner ruling; provenance, never a routing input). */
-	model?: string;
-	/** ISO timestamp of the compaction moment. */
-	at: string;
-}
+// CompactionDetails lives in ./compaction-queries.ts (single source of truth);
+// re-exported here so existing `compaction.ts` importers keep working.
 
 /** Build the compaction marker. Content is the FULL model-facing text
  * (header + summary — single-sourced header); the marker rides the
@@ -291,35 +279,6 @@ export function newCompactionMarker(summary: string, details: CompactionDetails)
 		details,
 		timestamp: Date.now(),
 	};
-}
-
-/** The ACTIVE compaction marker: the newest one with a retained-message
- * id. Its summary supersedes older markers even when their stored
- * positions remain inside its retained tail. */
-export function activeCompactionOf(messages: readonly LhMessage[]): (LhMarkerMessage & { details: CompactionDetails }) | null {
-	for (let i = messages.length - 1; i >= 0; i--) {
-		const m = messages[i]!;
-		if ((m as { role?: string }).role !== "custom") continue;
-		const marker = m as LhMarkerMessage;
-		if (marker.customType === "compaction") {
-			const details = marker.details as Partial<CompactionDetails>;
-			if (typeof details.firstKeptMessageId === "string") {
-				return marker as LhMarkerMessage & { details: CompactionDetails };
-			}
-		}
-	}
-	return null;
-}
-
-/** The index of the first KEPT message, or -1 when the record's active
- * marker names an id that no longer exists (corrupt/foreign) — callers
- * fall back to rendering everything (honest degradation, never throw). */
-export function keptIndexFor(messages: readonly LhMessage[], marker: LhMarkerMessage & { details: CompactionDetails }): number {
-	const id = marker.details.firstKeptMessageId;
-	for (let i = 0; i < messages.length; i++) {
-		if (messages[i]!.id === id) return i;
-	}
-	return -1;
 }
 
 // ─── the summarizer input (pi's mirror: labeled text, truncated results) ─────

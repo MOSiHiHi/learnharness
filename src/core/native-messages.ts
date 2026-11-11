@@ -47,7 +47,7 @@ import {
 	THINKING_LABEL,
 } from "./contracts/chat.ts";
 import { compactAnswerForModel, type QuestionAnswerData } from "./question-core.ts";
-import { activeCompactionOf, keptIndexFor } from "./compaction.ts";
+import { activeCompactionOf, keptIndexFor } from "./compaction-queries.ts";
 import { parseQuestionInput } from "./tool-parts.ts";
 import { expandCitationsForModel } from "./citations.ts";
 import { readPluginQuestionMessageAnnotation, readPluginQuestionAnswer, readPluginQuestionCancellation, samePluginQuestionOccurrence, type PluginQuestionAnnotationRead, type PluginQuestionOccurrence, type PluginQuestionOccurrenceMap, type PluginQuestionSnapshot } from "./plugin-questions.ts";
