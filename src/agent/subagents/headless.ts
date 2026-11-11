@@ -493,9 +493,15 @@ async function renderSvg(svg: string, opts: RenderSvgOptions = {}): Promise<Buff
 	// handling, never executable browser markup or a system Chrome fallback.
 	const { width } = svgViewport(svg, opts);
 	const { Resvg } = await import("@resvg/resvg-js");
+	const defaultFontFamily =
+		process.platform === "darwin" ? "Helvetica" : process.platform === "win32" ? "Arial" : "DejaVu Sans";
 	const resvg = new Resvg(opts.nativeOnly ? svg : svgImageSource(svg), {
 		fitTo: { mode: "width", value: width },
-		font: { loadSystemFonts: true },
+		font: {
+			loadSystemFonts: true,
+			defaultFontFamily,
+			sansSerifFamily: defaultFontFamily,
+		},
 		background: "#ffffff",
 	});
 	return providerSafePng(resvg.render().asPng());
